@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * BIZZNNOVATE design system — "Kinetic glass podium"
- * Dark broadcast command-center: near-black inks, cyan accent, gold leader,
- * emerald/rose trend signals. Anton display, Space Grotesk body, JetBrains Mono data.
+ * BIZZNNOVATE design system — "Bottle green arena"
+ * Deep bottle-green surfaces with warm beige typography and highlights,
+ * sage/terracotta trend signals. Anton display, Space Grotesk body, JetBrains Mono data.
  */
 
 @theme inline {
@@ -67,48 +67,48 @@
 
 :root {
   --radius: 0.625rem;
-  /* core inks */
-  --ink: oklch(0.145 0.012 264);
-  --ink-2: oklch(0.175 0.014 264);
-  --ink-3: oklch(0.21 0.016 264);
-  --ink-4: oklch(0.25 0.018 264);
-  --line: oklch(0.30 0.02 264);
-  --gold: oklch(0.82 0.155 85);
-  --up: oklch(0.77 0.15 160);
-  --down: oklch(0.70 0.17 15);
+  /* bottle-green foundation and warm beige highlights */
+  --ink: oklch(0.205 0.043 158);
+  --ink-2: oklch(0.235 0.046 158);
+  --ink-3: oklch(0.275 0.043 158);
+  --ink-4: oklch(0.32 0.04 158);
+  --line: oklch(0.41 0.036 156);
+  --gold: oklch(0.85 0.055 86);
+  --up: oklch(0.79 0.09 145);
+  --down: oklch(0.72 0.12 28);
   /* shadcn mapping (dark-only product) */
   --background: var(--ink);
-  --foreground: oklch(0.90 0.01 264);
+  --foreground: oklch(0.92 0.025 88);
   --card: var(--ink-2);
-  --card-foreground: oklch(0.90 0.01 264);
+  --card-foreground: oklch(0.92 0.025 88);
   --popover: var(--ink-3);
-  --popover-foreground: oklch(0.90 0.01 264);
-  --primary: oklch(0.82 0.13 210);
+  --popover-foreground: oklch(0.92 0.025 88);
+  --primary: oklch(0.85 0.055 86);
   --primary-foreground: var(--ink);
   --secondary: var(--ink-3);
-  --secondary-foreground: oklch(0.90 0.01 264);
+  --secondary-foreground: oklch(0.92 0.025 88);
   --muted: var(--ink-3);
-  --muted-foreground: oklch(0.62 0.02 264);
+  --muted-foreground: oklch(0.72 0.025 92);
   --accent: var(--ink-4);
-  --accent-foreground: oklch(0.95 0.01 264);
+  --accent-foreground: oklch(0.96 0.02 88);
   --destructive: var(--down);
-  --destructive-foreground: oklch(0.97 0.01 264);
+  --destructive-foreground: oklch(0.97 0.018 88);
   --border: var(--line);
   --input: var(--line);
-  --ring: oklch(0.82 0.13 210);
-  --chart-1: oklch(0.82 0.13 210);
+  --ring: oklch(0.85 0.055 86);
+  --chart-1: oklch(0.85 0.055 86);
   --chart-2: var(--gold);
   --chart-3: var(--up);
   --chart-4: var(--down);
-  --chart-5: oklch(0.65 0.15 280);
+  --chart-5: oklch(0.68 0.09 60);
   --sidebar: var(--ink-2);
-  --sidebar-foreground: oklch(0.90 0.01 264);
-  --sidebar-primary: oklch(0.82 0.13 210);
+  --sidebar-foreground: oklch(0.92 0.025 88);
+  --sidebar-primary: oklch(0.85 0.055 86);
   --sidebar-primary-foreground: var(--ink);
   --sidebar-accent: var(--ink-3);
-  --sidebar-accent-foreground: oklch(0.90 0.01 264);
+  --sidebar-accent-foreground: oklch(0.92 0.025 88);
   --sidebar-border: var(--line);
-  --sidebar-ring: oklch(0.82 0.13 210);
+  --sidebar-ring: oklch(0.85 0.055 86);
 }
 
 @layer base {
