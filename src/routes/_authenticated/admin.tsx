@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import bizznnovateLogo from "@/assets/bizznnovate-logo.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -98,12 +99,13 @@ function AdminPage() {
       {/* Sidebar */}
       <aside className="flex w-56 shrink-0 flex-col border-r border-line bg-ink-2/60 p-4">
         <div className="flex items-center gap-3 px-2">
-          <div className="grid size-9 place-items-center rounded-lg bg-gradient-to-br from-primary/25 to-gold/15 ring-1 ring-primary/30">
-            <span className="font-display text-sm text-primary">B</span>
-          </div>
-          <div className="leading-none">
-            <div className="font-display text-base tracking-wide">BIZZNNOVATE</div>
-            <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
+          <div>
+            <img
+              src={bizznnovateLogo.url}
+              alt="BIZZNNOVATE"
+              className="h-auto w-36 object-contain object-left"
+            />
+            <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
               Admin Console
             </div>
           </div>

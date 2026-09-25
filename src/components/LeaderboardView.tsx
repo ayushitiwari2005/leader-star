@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import bizznnovateLogo from "@/assets/bizznnovate-logo.png.asset.json";
 
 function TrendBadge({ delta }: { delta: number | undefined }) {
   if (delta === undefined || delta === 0)
@@ -154,21 +155,16 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
         {/* HEADER */}
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line/80 pb-5">
           <div className="flex items-center gap-4">
-            <div className="grid size-11 place-items-center rounded-xl bg-gradient-to-br from-primary/25 to-gold/15 ring-1 ring-primary/30">
-              <span className="font-display text-lg text-primary">B</span>
-            </div>
-            <div className="leading-none">
-              <div
-                className={cn(
-                  "font-display tracking-wide text-foreground",
-                  displayMode ? "text-4xl" : "text-2xl",
-                )}
-              >
-                BIZZNNOVATE
-              </div>
-              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
-                IIPS DAVV · Business Competition
-              </div>
+            <img
+              src={bizznnovateLogo.url}
+              alt="BIZZNNOVATE — Acquire. Build. Battle. Defend."
+              className={cn(
+                "h-auto object-contain object-left",
+                displayMode ? "w-64 sm:w-72" : "w-44 sm:w-52",
+              )}
+            />
+            <div className="hidden border-l border-line pl-4 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground md:block">
+              IIPS DAVV<br />Business Competition
             </div>
           </div>
           <div className="flex items-center gap-3">
