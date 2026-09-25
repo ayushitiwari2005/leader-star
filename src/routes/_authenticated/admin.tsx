@@ -275,7 +275,6 @@ function ScoreEntry({
       setPoints("");
       setRemarks("");
       onSaved();
-      return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to save score";
       if (msg.startsWith("CONFLICT")) {

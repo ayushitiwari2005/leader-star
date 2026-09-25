@@ -11,7 +11,8 @@ export const getMyRole = createServerFn({ method: "GET" })
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
-    if (roles && roles.length > 0) return { role: roles[0].role as string };
+    const firstRole = roles?.[0];
+    if (firstRole) return { role: firstRole.role as string };
 
     // Bootstrap: if no roles exist at all, the first signed-in user becomes super_admin.
     const { count } = await supabase
@@ -152,7 +153,7 @@ export const updateActivity = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.id)
       .single();
-    const patch: Record<string, unknown> = {};
+    const patch: { status?: string; max_score?: number; weight?: number } = {};
     if (data.status) patch.status = data.status;
     if (data.maxScore !== undefined) patch.max_score = data.maxScore;
     if (data.weight !== undefined) patch.weight = data.weight;
@@ -162,8 +163,8 @@ export const updateActivity = createServerFn({ method: "POST" })
       action: "activity_update",
       entity_type: "activity",
       entity_id: data.id,
-      old_value: before,
-      new_value: patch,
+      old_value: before ? JSON.parse(JSON.stringify(before)) : null,
+      new_value: JSON.parse(JSON.stringify(patch)),
       performed_by: userId,
     });
     return { ok: true };
@@ -188,7 +189,12 @@ export const updateTeam = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.id)
       .single();
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const patch: {
+      updated_at: string;
+      current_capital?: number;
+      acquired_business?: string | null;
+      status?: string;
+    } = { updated_at: new Date().toISOString() };
     if (data.currentCapital !== undefined) patch.current_capital = data.currentCapital;
     if (data.acquiredBusiness !== undefined) patch.acquired_business = data.acquiredBusiness;
     if (data.status) patch.status = data.status;
@@ -201,7 +207,7 @@ export const updateTeam = createServerFn({ method: "POST" })
       old_value: before
         ? { current_capital: before.current_capital, status: before.status }
         : null,
-      new_value: patch,
+      new_value: JSON.parse(JSON.stringify(patch)),
       performed_by: userId,
     });
     return { ok: true };
