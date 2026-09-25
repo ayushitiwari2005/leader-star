@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRole } from "@/lib/admin.functions";
+import bizznnovateLogo from "@/assets/bizznnovate-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,15 +65,14 @@ function AuthPage() {
         <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-gold/10 blur-[130px]" />
       </div>
       <div className="glass relative w-full max-w-sm rounded-xl p-8 ring-1 ring-line">
-        <div className="flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-lg bg-gradient-to-br from-primary/25 to-gold/15 ring-1 ring-primary/30">
-            <span className="font-display text-primary">B</span>
-          </div>
-          <div>
-            <div className="font-display text-xl tracking-wide">BIZZNNOVATE</div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-              Admin Console
-            </div>
+        <div>
+          <img
+            src={bizznnovateLogo.url}
+            alt="BIZZNNOVATE"
+            className="h-auto w-48 object-contain object-left"
+          />
+          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            Admin Console
           </div>
         </div>
 
