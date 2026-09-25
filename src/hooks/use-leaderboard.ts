@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -74,17 +74,33 @@ export function useLeaderboard() {
     if (query.data && !lastUpdated) setLastUpdated(new Date());
   }, [query.data, lastUpdated]);
 
-  const standings: Standing[] = query.data
-    ? computeStandings(query.data.teams, query.data.activities, query.data.scores)
-    : [];
+  const standings: Standing[] = useMemo(
+    () =>
+      query.data
+        ? computeStandings(query.data.teams, query.data.activities, query.data.scores)
+        : [],
+    [query.data],
+  );
 
   // Track previous ranks for trend indicators
   const prevRanks = useRef<Map<string, number>>(new Map());
   const [trends, setTrends] = useState<Map<string, number>>(new Map());
   useEffect(() => {
     if (standings.length === 0) return;
-    const next = new Map<string, number>();
     const prev = prevRanks.current;
+    const current = new Map(standings.map((s) => [s.team.id, s.rank]));
+    // Skip if ranks are unchanged
+    let changed = prev.size !== current.size;
+    if (!changed) {
+      for (const [id, rank] of current) {
+        if (prev.get(id) !== rank) {
+          changed = true;
+          break;
+        }
+      }
+    }
+    if (!changed) return;
+    const next = new Map<string, number>();
     if (prev.size > 0) {
       for (const s of standings) {
         const before = prev.get(s.team.id);
@@ -93,7 +109,7 @@ export function useLeaderboard() {
         }
       }
     }
-    prevRanks.current = new Map(standings.map((s) => [s.team.id, s.rank]));
+    prevRanks.current = current;
     setTrends(next);
   }, [standings]);
 
