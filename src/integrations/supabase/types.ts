@@ -14,16 +14,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          created_at: string
+          day: number
+          description: string | null
+          id: string
+          max_score: number
+          name: string
+          sort_order: number
+          status: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          day?: number
+          description?: string | null
+          id?: string
+          max_score?: number
+          name: string
+          sort_order?: number
+          status?: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          day?: number
+          description?: string | null
+          id?: string
+          max_score?: number
+          name?: string
+          sort_order?: number
+          status?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          performed_by?: string | null
+        }
+        Relationships: []
+      }
+      scores: {
+        Row: {
+          activity_id: string
+          created_at: string
+          entered_by: string | null
+          id: string
+          points: number
+          remarks: string | null
+          team_id: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          entered_by?: string | null
+          id?: string
+          points?: number
+          remarks?: string | null
+          team_id: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          entered_by?: string | null
+          id?: string
+          points?: number
+          remarks?: string | null
+          team_id?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          acquired_business: string | null
+          created_at: string
+          current_capital: number
+          id: string
+          initial_capital: number
+          members_count: number
+          name: string
+          status: string
+          team_code: string
+          theme: string
+          updated_at: string
+        }
+        Insert: {
+          acquired_business?: string | null
+          created_at?: string
+          current_capital?: number
+          id?: string
+          initial_capital?: number
+          members_count?: number
+          name: string
+          status?: string
+          team_code: string
+          theme?: string
+          updated_at?: string
+        }
+        Update: {
+          acquired_business?: string | null
+          created_at?: string
+          current_capital?: number
+          id?: string
+          initial_capital?: number
+          members_count?: number
+          name?: string
+          status?: string
+          team_code?: string
+          theme?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +336,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin", "viewer"],
+    },
   },
 } as const
