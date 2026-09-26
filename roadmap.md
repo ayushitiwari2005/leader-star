@@ -1,0 +1,3 @@
+- [ ] Match the shared BIZZNNOVATE site's colors, typography, textures, and branding across public, display, sign-in, and admin screens.
+- [ ] Preserve leaderboard and administration behavior on the existing PostgreSQL-backed Lovable Cloud data.
+- [ ] Verify desktop/mobile rendering and preview health.
