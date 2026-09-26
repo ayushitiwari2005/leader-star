@@ -1,0 +1,3 @@
+- [x] Match the shared BIZZNNOVATE site's colors, typography, textures, and branding across public, display, sign-in, and admin screens.
+- [x] Preserve leaderboard and administration behavior on the existing PostgreSQL-backed Lovable Cloud data.
+- [x] Verify desktop/mobile rendering and preview health. Public and display screens were checked; admin sign-in was checked, but authenticated admin preview was unavailable without a user session.

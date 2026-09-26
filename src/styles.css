@@ -5,9 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * BIZZNNOVATE design system — "Bottle green arena"
- * Deep bottle-green surfaces with warm beige typography and highlights,
- * sage/terracotta trend signals. Anton display, Space Grotesk body, JetBrains Mono data.
+ * BIZZNNOVATE reference design — warm paper, forest green, kraft and espresso.
  */
 
 @theme inline {
@@ -60,55 +58,54 @@
   --color-gold: var(--gold);
   --color-up: var(--up);
   --color-down: var(--down);
-  --font-display: "Anton", sans-serif;
-  --font-sans: "Space Grotesk", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: "Playfair Display", serif;
+  --font-heading: "Cinzel", serif;
+  --font-sans: "DM Sans", sans-serif;
+  --font-mono: "DM Sans", sans-serif;
 }
 
 :root {
-  --radius: 0.625rem;
-  /* bottle-green foundation and warm beige highlights */
-  --ink: oklch(0.205 0.043 158);
-  --ink-2: oklch(0.235 0.046 158);
-  --ink-3: oklch(0.275 0.043 158);
-  --ink-4: oklch(0.32 0.04 158);
-  --line: oklch(0.41 0.036 156);
-  --gold: oklch(0.85 0.055 86);
-  --up: oklch(0.79 0.09 145);
-  --down: oklch(0.72 0.12 28);
-  /* shadcn mapping (dark-only product) */
+  --radius: 0.25rem;
+  --ink: #dbcfb8;
+  --ink-2: #ebe5d8;
+  --ink-3: #f4f1ea;
+  --ink-4: #c9b395;
+  --line: #a4774b;
+  --gold: #8c5a21;
+  --up: #3b613a;
+  --down: #a44332;
   --background: var(--ink);
-  --foreground: oklch(0.92 0.025 88);
+  --foreground: #4a3525;
   --card: var(--ink-2);
-  --card-foreground: oklch(0.92 0.025 88);
+  --card-foreground: var(--foreground);
   --popover: var(--ink-3);
-  --popover-foreground: oklch(0.92 0.025 88);
-  --primary: oklch(0.85 0.055 86);
-  --primary-foreground: var(--ink);
-  --secondary: var(--ink-3);
-  --secondary-foreground: oklch(0.92 0.025 88);
-  --muted: var(--ink-3);
-  --muted-foreground: oklch(0.72 0.025 92);
-  --accent: var(--ink-4);
-  --accent-foreground: oklch(0.96 0.02 88);
+  --popover-foreground: var(--foreground);
+  --primary: #3b613a;
+  --primary-foreground: #f4f1ea;
+  --secondary: #bcbaa2;
+  --secondary-foreground: var(--foreground);
+  --muted: var(--ink-2);
+  --muted-foreground: #604c3b;
+  --accent: #bcbaa2;
+  --accent-foreground: var(--foreground);
   --destructive: var(--down);
-  --destructive-foreground: oklch(0.97 0.018 88);
-  --border: var(--line);
-  --input: var(--line);
-  --ring: oklch(0.85 0.055 86);
-  --chart-1: oklch(0.85 0.055 86);
+  --destructive-foreground: var(--ink-3);
+  --border: color-mix(in oklab, var(--line) 40%, transparent);
+  --input: color-mix(in oklab, var(--line) 55%, transparent);
+  --ring: var(--primary);
+  --chart-1: var(--primary);
   --chart-2: var(--gold);
   --chart-3: var(--up);
   --chart-4: var(--down);
-  --chart-5: oklch(0.68 0.09 60);
+  --chart-5: var(--line);
   --sidebar: var(--ink-2);
-  --sidebar-foreground: oklch(0.92 0.025 88);
-  --sidebar-primary: oklch(0.85 0.055 86);
-  --sidebar-primary-foreground: var(--ink);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: var(--ink-3);
-  --sidebar-accent-foreground: oklch(0.92 0.025 88);
-  --sidebar-border: var(--line);
-  --sidebar-ring: oklch(0.85 0.055 86);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--primary);
 }
 
 @layer base {
@@ -118,6 +115,8 @@
 
   body {
     background-color: var(--color-background);
+    background-image: url('/__l5e/assets-v1/2e116fdf-b672-4550-9554-5f83f52d9c25/grain-light.webp');
+    background-repeat: repeat;
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
@@ -127,9 +126,9 @@
   }
 }
 
-/* Broadcast utilities */
+/* Paper surfaces and quiet live signals */
 @utility glass {
-  background: linear-gradient(135deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.02));
+  background: color-mix(in oklab, var(--card) 85%, transparent);
 }
 
 @utility live-dot {
@@ -149,12 +148,12 @@
 }
 
 @keyframes breathe {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgb(52 211 153 / 0.5); }
-  50% { opacity: 0.55; box-shadow: 0 0 0 6px rgb(52 211 153 / 0); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 40%, transparent); }
+  50% { opacity: 0.55; box-shadow: 0 0 0 6px transparent; }
 }
 
 @keyframes pulseRow {
-  0% { background-color: rgb(34 211 238 / 0.16); }
+  0% { background-color: color-mix(in oklab, var(--primary) 18%, transparent); }
   100% { background-color: transparent; }
 }
 
@@ -166,4 +165,8 @@
 @keyframes sweep {
   0% { transform: translateX(-120%); }
   100% { transform: translateX(320%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot, .pulse-row, .slide-in, .sweep { animation: none; }
 }

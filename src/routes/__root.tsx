@@ -101,7 +101,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap",
       },
     ],
   }),
@@ -113,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -131,7 +131,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster theme="dark" position="bottom-right" />
+      <Toaster theme="light" position="bottom-right" />
     </QueryClientProvider>
   );
 }
