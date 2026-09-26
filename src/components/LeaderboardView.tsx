@@ -15,7 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import bizznnovateLogo from "@/assets/bizznnovate-logo.png.asset.json";
+import emblem from "@/assets/reference-emblem.webp.asset.json";
+import wordmark from "@/assets/reference-wordmark.webp.asset.json";
 
 function TrendBadge({ delta }: { delta: number | undefined }) {
   if (delta === undefined || delta === 0)
@@ -41,8 +42,8 @@ function PodiumCard({
     <button
       onClick={() => onSelect(standing)}
       className={cn(
-        "glass relative overflow-hidden rounded-xl p-5 text-left ring-1 transition-transform hover:-translate-y-1",
-        isFirst ? "ring-gold/40 p-6" : "ring-line",
+        "glass relative overflow-hidden rounded-sm border border-line/40 p-5 text-left shadow-[3px_4px_0_#a4774b33] transition-transform hover:-translate-y-1",
+        isFirst ? "border-primary/60 p-6 bg-[#e7ddc9]" : "",
         place === 2 && "md:order-1 md:mt-8",
         place === 1 && "md:order-2",
         place === 3 && "md:order-3 md:mt-12",
@@ -50,21 +51,21 @@ function PodiumCard({
     >
       {isFirst && (
         <div className="absolute inset-x-0 top-0 h-px overflow-hidden">
-          <div className="sweep h-full w-1/3 bg-gradient-to-r from-transparent via-gold to-transparent" />
+          <div className="sweep h-full w-1/3 bg-gradient-to-r from-transparent via-primary to-transparent" />
         </div>
       )}
       <div
         className={cn(
           "absolute right-4 top-4 font-mono text-[11px] uppercase tracking-[0.2em]",
-          isFirst ? "text-gold" : "text-muted-foreground",
+          isFirst ? "text-primary" : "text-muted-foreground",
         )}
       >
         Rank 0{place}
       </div>
       <div
         className={cn(
-          "mt-8 font-display",
-          isFirst ? "text-7xl text-gold" : "text-6xl",
+          "mt-8 font-heading",
+          isFirst ? "text-7xl text-primary" : "text-6xl",
           place === 2 && "text-muted-foreground",
           place === 3 && "text-muted-foreground/80",
         )}
@@ -82,7 +83,7 @@ function PodiumCard({
       <div
         className={cn(
           "font-mono text-[11px] uppercase tracking-[0.2em]",
-          isFirst ? "text-gold/70" : "text-muted-foreground",
+          isFirst ? "text-primary" : "text-muted-foreground",
         )}
       >
         {standing.team.theme}
@@ -139,70 +140,61 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
   };
 
   return (
-    <div className="min-h-screen bg-ink font-sans text-foreground antialiased">
-      {/* ambient light */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-32 h-[520px] w-[520px] rounded-full bg-primary/10 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 h-[460px] w-[460px] rounded-full bg-gold/10 blur-[130px]" />
-      </div>
+    <div className="min-h-screen font-sans text-foreground antialiased">
 
       <div
         className={cn(
-          "relative mx-auto px-5 py-6",
+          "relative mx-auto px-5 py-5",
           displayMode ? "max-w-[1600px] lg:px-12" : "max-w-[1440px] lg:px-10",
         )}
       >
         {/* HEADER */}
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line/80 pb-5">
-          <div className="flex items-center gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line/40 pb-5">
+          <div className="flex items-center gap-3">
             <img
-              src={bizznnovateLogo.url}
-              alt="BIZZNNOVATE — Acquire. Build. Battle. Defend."
-              className={cn(
-                "h-auto object-contain object-left",
-                displayMode ? "w-64 sm:w-72" : "w-44 sm:w-52",
-              )}
+              src={emblem.url}
+              alt="BIZZNNOVATE emblem"
+              className={cn("object-contain", displayMode ? "size-16" : "size-11 sm:size-13")}
             />
-            <div className="hidden border-l border-line pl-4 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground md:block">
-              IIPS DAVV<br />Business Competition
-            </div>
+            <img src={wordmark.url} alt="BIZZNNOVATE" className={cn("h-auto object-contain", displayMode ? "w-56" : "w-36 sm:w-44")} />
+            <span className="hidden border-l border-line/50 pl-4 font-mono text-[10px] uppercase tracking-[0.2em] text-primary md:block">IIPS · DAVV · INDORE</span>
           </div>
           <div className="flex items-center gap-3">
             {liveFlash && (
-              <div className="slide-in rounded-full bg-gold/15 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-gold ring-1 ring-gold/40">
+              <div className="slide-in border border-primary/30 bg-primary/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-primary">
                 {liveFlash}
               </div>
             )}
-            <div className="flex items-center gap-2 rounded-full bg-ink-3/80 px-3 py-1.5 ring-1 ring-line">
+            <div className="flex items-center gap-2 border border-primary/35 bg-primary/10 px-3 py-1.5">
               <span className="live-dot size-2 rounded-full bg-up" />
               <span className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-up">
                 Live
               </span>
             </div>
-            <div className="hidden rounded-full bg-ink-3/80 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground ring-1 ring-line sm:block">
+            <div className="hidden border border-line/40 bg-ink-3/60 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground sm:block">
               Updated {lastUpdated ? formatTime(lastUpdated) : "—"}
             </div>
             {displayMode ? (
               <button
                 onClick={requestFullscreen}
-                className="flex items-center gap-2 rounded-full bg-ink-3/80 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground ring-1 ring-line transition-colors hover:text-foreground"
+                className="flex items-center gap-2 border border-line/40 bg-ink-3/60 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
               >
                 <Maximize className="size-3.5" /> Fullscreen
               </button>
             ) : (
-              <div className="flex items-center gap-1 rounded-full bg-ink-3/80 p-1 ring-1 ring-line">
-                <span className="rounded-full bg-primary/90 px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-primary-foreground">
+              <div className="flex items-center gap-1 border border-line/40 bg-ink-3/60 p-1">
+                <span className="bg-primary px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-primary-foreground">
                   Public
                 </span>
                 <Link
                   to="/display"
-                  className="rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+                   className="px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Display
                 </Link>
                 <Link
                   to="/admin"
-                  className="rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+                   className="px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Admin
                 </Link>
@@ -212,7 +204,7 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
         </header>
 
         {/* TICKER */}
-        <div className="mt-5 overflow-hidden rounded-xl bg-ink-2/70 ring-1 ring-line">
+        <div className="mt-5 overflow-hidden border-y border-line/50 bg-ink-2/60">
           <div className="flex items-center gap-6 whitespace-nowrap py-2 pl-4 pr-2">
             <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.3em] text-primary">
               Market
@@ -255,11 +247,11 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
 
         {/* PODIUM */}
         <section className="mt-8">
-          <div className="mb-4 flex items-end justify-between">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
             <h1
               className={cn(
-                "font-display tracking-wide text-foreground",
-                displayMode ? "text-6xl" : "text-4xl sm:text-5xl",
+                "font-heading font-semibold tracking-tight text-foreground",
+                displayMode ? "text-5xl sm:text-6xl" : "text-3xl sm:text-5xl",
               )}
             >
               Live Leaderboard
@@ -273,7 +265,7 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
           {isLoading ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-56 animate-pulse rounded-xl bg-ink-3/60 ring-1 ring-line" />
+                 <div key={i} className="h-56 animate-pulse border border-line/40 bg-ink-3/60" />
               ))}
             </div>
           ) : (
@@ -296,7 +288,7 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2
               className={cn(
-                "font-display tracking-wide text-foreground",
+                "font-heading font-semibold tracking-wide text-foreground",
                 displayMode ? "text-3xl" : "text-xl",
               )}
             >
@@ -310,13 +302,13 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search team…"
-                    className="h-9 w-48 rounded-lg bg-ink-3/80 pl-9 pr-3 font-mono text-xs text-foreground ring-1 ring-line placeholder:text-muted-foreground focus:outline-none focus:ring-primary"
+                    className="h-9 w-48 border border-line/50 bg-ink-3/80 pl-9 pr-3 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <select
                   value={themeFilter}
                   onChange={(e) => setThemeFilter(e.target.value)}
-                  className="h-9 rounded-lg bg-ink-3/80 px-3 font-mono text-xs text-foreground ring-1 ring-line focus:outline-none focus:ring-primary"
+                  className="h-9 border border-line/50 bg-ink-3/80 px-3 font-mono text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="all">All themes</option>
                   {themes.map((t) => (
@@ -329,7 +321,8 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
             )}
           </div>
 
-          <div className="overflow-hidden rounded-xl bg-ink-2/60 ring-1 ring-line">
+          <div className="overflow-x-auto border border-line/40 bg-ink-2/80 shadow-[3px_4px_0_#a4774b26]">
+            <div className="min-w-[660px]">
             <div
               className={cn(
                 "grid grid-cols-[3rem_1fr_5rem_6rem_3rem_4rem] gap-3 border-b border-line px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground",
@@ -414,10 +407,11 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
                 </div>
               )}
             </div>
+            </div>
           </div>
         </section>
 
-        <footer className="mt-8 flex items-center justify-between border-t border-line/80 pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+        <footer className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-line/40 pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
           <span>BIZZNNOVATE · IIPS DAVV</span>
           <span>Food & Nutrition · Health & Fitness · Fashion & Lifestyle</span>
         </footer>
