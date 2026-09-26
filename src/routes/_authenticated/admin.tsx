@@ -295,7 +295,7 @@ function ScoreEntry({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-         <div className="glass border border-line/40 p-5 shadow-[2px_3px_0_#a4774b26]">
+      <div className="glass border border-line/40 p-5 shadow-[2px_3px_0_#a4774b26]">
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
           Score Entry
         </div>
@@ -392,13 +392,15 @@ function ScoreEntry({
       </div>
 
       {/* Current scores table */}
-      <div className="overflow-hidden rounded-xl bg-ink-2/60 ring-1 ring-line">
+       <div className="overflow-x-auto border border-line/40 bg-ink-2/80">
+        <div className="min-w-[430px]">
         <div className="grid grid-cols-[1fr_5rem_5rem_6rem] gap-3 border-b border-line px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
           <span>Team</span>
           <span className="text-right">Score</span>
           <span className="text-right">Max</span>
           <span className="text-right">Updated</span>
         </div>
+       </div>
         <div className="max-h-[480px] divide-y divide-line/60 overflow-y-auto">
           {activityId &&
             teams.map((t) => {
@@ -500,7 +502,8 @@ function TeamsSection({ teams }: { teams: import("@/lib/leaderboard").Team[] }) 
   };
 
   return (
-    <div className="overflow-hidden rounded-xl bg-ink-2/60 ring-1 ring-line">
+    <div className="overflow-x-auto border border-line/40 bg-ink-2/80">
+      <div className="min-w-[650px]">
       <div className="grid grid-cols-[4rem_1fr_7rem_1fr_5rem] gap-3 border-b border-line px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         <span>Code</span>
         <span>Team</span>
@@ -562,6 +565,7 @@ function TeamsSection({ teams }: { teams: import("@/lib/leaderboard").Team[] }) 
           </div>
         ))}
       </div>
+      </div>
     </div>
   );
 }
@@ -587,7 +591,7 @@ function ActivitiesSection({
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {activities.map((a) => (
-        <div key={a.id} className="glass rounded-xl p-4 ring-1 ring-line">
+        <div key={a.id} className="glass border border-line/40 p-4 shadow-[2px_3px_0_#a4774b26]">
           <div className="flex items-start justify-between">
             <div>
               <div className="font-display text-lg tracking-wide text-foreground">{a.name}</div>
@@ -635,7 +639,8 @@ function AuditSection() {
   const logs = query.data?.logs ?? [];
 
   return (
-    <div className="overflow-hidden rounded-xl bg-ink-2/60 ring-1 ring-line">
+    <div className="overflow-x-auto border border-line/40 bg-ink-2/80">
+      <div className="min-w-[680px]">
       <div className="grid grid-cols-[7rem_1fr_6rem_1fr] gap-3 border-b border-line px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         <span>Time</span>
         <span>Action</span>
@@ -666,6 +671,7 @@ function AuditSection() {
             No audit entries yet.
           </div>
         )}
+      </div>
       </div>
     </div>
   );
