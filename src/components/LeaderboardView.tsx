@@ -225,7 +225,7 @@ export function LeaderboardView({ displayMode = false }: { displayMode?: boolean
                 </span>
                 <span>
                   FASHION / LIFESTYLE{" "}
-                  <span className="text-down">
+                   <span className="text-primary">
                     {standings.filter((s) => s.team.theme === "Fashion & Lifestyle").length} TEAMS
                   </span>
                 </span>

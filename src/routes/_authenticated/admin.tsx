@@ -96,9 +96,9 @@ function AdminPage() {
     ).length;
 
   return (
-    <div className="flex min-h-screen bg-ink font-sans text-foreground">
+    <div className="flex min-h-screen flex-col font-sans text-foreground md:flex-row">
       {/* Sidebar */}
-      <aside className="flex w-56 shrink-0 flex-col border-r border-line/50 bg-ink-2/80 p-4">
+      <aside className="flex shrink-0 flex-col border-b border-line/50 bg-ink-2/80 p-4 md:w-56 md:border-b-0 md:border-r">
         <div className="flex items-center gap-3 px-2">
           <img src={emblem.url} alt="BIZZNNOVATE emblem" className="size-10 object-contain" />
           <div className="min-w-0">
@@ -112,13 +112,13 @@ function AdminPage() {
             </div>
           </div>
         </div>
-        <nav className="mt-8 space-y-1">
+        <nav className="mt-4 flex gap-1 overflow-x-auto md:mt-8 md:block md:space-y-1">
           {NAV.map((item) => (
             <button
               key={item.id}
               onClick={() => setSection(item.id)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-[0.15em] transition-colors",
+                 "flex shrink-0 items-center gap-2 whitespace-nowrap px-3 py-2.5 font-mono text-xs uppercase tracking-[0.15em] transition-colors md:w-full md:gap-3",
                 section === item.id
                    ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-ink-3/60 hover:text-foreground",
@@ -129,16 +129,16 @@ function AdminPage() {
             </button>
           ))}
         </nav>
-        <div className="mt-auto space-y-1">
+        <div className="mt-3 flex gap-2 md:mt-auto md:block md:space-y-1">
           <Link
             to="/"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-ink-3/60 hover:text-foreground"
+             className="flex items-center gap-3 px-3 py-2.5 font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-ink-3/60 hover:text-foreground md:w-full"
           >
             <ListChecks className="size-4" /> Leaderboard
           </Link>
           <button
             onClick={signOut}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-ink-3/60 hover:text-down"
+             className="flex items-center gap-3 px-3 py-2.5 font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-ink-3/60 hover:text-down md:w-full"
           >
             <LogOut className="size-4" /> Logout
           </button>
@@ -146,7 +146,7 @@ function AdminPage() {
       </aside>
 
       {/* Main */}
-      <main className="min-w-0 flex-1 p-6 lg:p-8">
+       <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
              <h1 className="font-heading text-3xl font-semibold tracking-wide">
@@ -205,7 +205,7 @@ function Dashboard(props: {
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
       {cards.map((c) => (
-        <div key={c.label} className="glass rounded-xl p-4 ring-1 ring-line">
+         <div key={c.label} className="glass border border-line/40 p-4 shadow-[2px_3px_0_#a4774b26]">
           <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             {c.label}
           </div>
@@ -295,7 +295,7 @@ function ScoreEntry({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="glass rounded-xl p-5 ring-1 ring-line">
+         <div className="glass border border-line/40 p-5 shadow-[2px_3px_0_#a4774b26]">
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
           Score Entry
         </div>
