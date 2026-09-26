@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRole } from "@/lib/admin.functions";
-import bizznnovateLogo from "@/assets/bizznnovate-logo.png.asset.json";
+import emblem from "@/assets/reference-emblem.webp.asset.json";
+import wordmark from "@/assets/reference-wordmark.webp.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,20 +60,17 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ink px-4 font-sans text-foreground">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-32 h-[520px] w-[520px] rounded-full bg-primary/10 blur-[120px]" />
-        <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-gold/10 blur-[130px]" />
-      </div>
-      <div className="glass relative w-full max-w-sm rounded-xl p-8 ring-1 ring-line">
-        <div>
+    <div className="flex min-h-screen items-center justify-center px-4 font-sans text-foreground">
+      <div className="glass relative w-full max-w-sm border border-line/50 p-8 shadow-[5px_6px_0_#a4774b33]">
+        <div className="flex items-center gap-3">
           <img
-            src={bizznnovateLogo.url}
-            alt="BIZZNNOVATE"
-            className="h-auto w-48 object-contain object-left"
+            src={emblem.url}
+            alt="BIZZNNOVATE emblem"
+            className="size-12 object-contain"
           />
-          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Admin Console
+          <div>
+            <img src={wordmark.url} alt="BIZZNNOVATE" className="w-44 object-contain" />
+            <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Admin Console</div>
           </div>
         </div>
 

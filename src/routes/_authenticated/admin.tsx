@@ -43,7 +43,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import bizznnovateLogo from "@/assets/bizznnovate-logo.png.asset.json";
+import emblem from "@/assets/reference-emblem.webp.asset.json";
+import wordmark from "@/assets/reference-wordmark.webp.asset.json";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -97,15 +98,16 @@ function AdminPage() {
   return (
     <div className="flex min-h-screen bg-ink font-sans text-foreground">
       {/* Sidebar */}
-      <aside className="flex w-56 shrink-0 flex-col border-r border-line bg-ink-2/60 p-4">
+      <aside className="flex w-56 shrink-0 flex-col border-r border-line/50 bg-ink-2/80 p-4">
         <div className="flex items-center gap-3 px-2">
-          <div>
+          <img src={emblem.url} alt="BIZZNNOVATE emblem" className="size-10 object-contain" />
+          <div className="min-w-0">
             <img
-              src={bizznnovateLogo.url}
+              src={wordmark.url}
               alt="BIZZNNOVATE"
-              className="h-auto w-36 object-contain object-left"
+              className="h-auto w-30 object-contain object-left"
             />
-            <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
+            <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.2em] text-primary">
               Admin Console
             </div>
           </div>
@@ -118,7 +120,7 @@ function AdminPage() {
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-[0.15em] transition-colors",
                 section === item.id
-                  ? "bg-primary/15 text-primary ring-1 ring-primary/30"
+                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-ink-3/60 hover:text-foreground",
               )}
             >
@@ -147,7 +149,7 @@ function AdminPage() {
       <main className="min-w-0 flex-1 p-6 lg:p-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="font-display text-3xl tracking-wide">
+             <h1 className="font-heading text-3xl font-semibold tracking-wide">
               {NAV.find((n) => n.id === section)?.label}
             </h1>
             <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
