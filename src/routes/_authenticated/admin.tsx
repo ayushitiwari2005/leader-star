@@ -497,8 +497,8 @@ function TeamsSection({ teams }: { teams: import("@/lib/leaderboard").Team[] }) 
   const add = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     const name = newName.trim();
-    if (!name) return toast.error("Team name is required.");
-    if (isDup(name)) return toast.error(`A team named "${name}" already exists.`);
+    if (!name) { toast.error("Team name is required."); return; }
+    if (isDup(name)) { toast.error(`A team named "${name}" already exists.`); return; }
     setAdding(true);
     try {
       await createTeam({ data: { name } });
@@ -514,8 +514,8 @@ function TeamsSection({ teams }: { teams: import("@/lib/leaderboard").Team[] }) 
 
   const saveName = async (id: string) => {
     const name = editName.trim();
-    if (!name) return toast.error("Team name is required.");
-    if (isDup(name, id)) return toast.error(`A team named "${name}" already exists.`);
+    if (!name) { toast.error("Team name is required."); return; }
+    if (isDup(name, id)) { toast.error(`A team named "${name}" already exists.`); return; }
     try {
       await renameTeam({ data: { id, name } });
       toast.success("Team renamed");
