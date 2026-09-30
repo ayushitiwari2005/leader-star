@@ -74,6 +74,11 @@ export function useLeaderboard() {
     if (query.data && !lastUpdated) setLastUpdated(new Date());
   }, [query.data, lastUpdated]);
 
+  const publicActivities = useMemo(
+    () => (query.data?.activities ?? []).filter((a) => a.status !== "disabled"),
+    [query.data],
+  );
+
   const standings: Standing[] = useMemo(
     () =>
       query.data
@@ -115,7 +120,8 @@ export function useLeaderboard() {
 
   return {
     teams: query.data?.teams ?? [],
-    activities: query.data?.activities ?? [],
+    activities: publicActivities,
+    allActivities: query.data?.activities ?? [],
     scores: query.data?.scores ?? [],
     standings,
     trends,
