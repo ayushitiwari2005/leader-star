@@ -224,3 +224,84 @@ export const getAuditLogs = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { logs: data };
   });
+
+async function assertAdmin(supabase: any, userId: string) {
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const role = data?.[0]?.role as string | undefined;
+  if (role !== "admin" && role !== "super_admin") throw new Error("You do not have permission.");
+}
+
+async function assertUniqueName(supabase: any, name: string, exceptId?: string) {
+  const { data } = await supabase.from("teams").select("id").ilike("name", name.replace(/[%_\\]/g, "\\$&"));
+  if ((data ?? []).some((r: { id: string }) => r.id !== exceptId)) {
+    throw new Error(`A team named "${name}" already exists.`);
+  }
+}
+
+const teamName = z.string().trim().min(1, "Team name is required.").max(100);
+
+export const createTeam = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ name: teamName }).parse(data))
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    await assertUniqueName(supabase, data.name);
+    const { data: codes } = await supabase.from("teams").select("team_code");
+    const max = (codes ?? []).reduce((m, r) => {
+      const n = parseInt(String(r.team_code).replace(/\D/g, ""), 10);
+      return Number.isFinite(n) && n > m ? n : m;
+    }, 0);
+    const code = `T${String(max + 1).padStart(2, "0")}`;
+    const { data: team, error } = await supabase
+      .from("teams")
+      .insert({ name: data.name, team_code: code })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    await supabase.from("audit_logs").insert({
+      action: "team_create", entity_type: "team", entity_id: team.id,
+      old_value: null, new_value: { name: data.name, team_code: code }, performed_by: userId,
+    });
+    return { team };
+  });
+
+export const renameTeam = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ id: z.string().uuid(), name: teamName }).parse(data))
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    await assertUniqueName(supabase, data.name, data.id);
+    const { data: before } = await supabase.from("teams").select("name").eq("id", data.id).single();
+    const { error } = await supabase
+      .from("teams")
+      .update({ name: data.name, updated_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await supabase.from("audit_logs").insert({
+      action: "team_rename", entity_type: "team", entity_id: data.id,
+      old_value: before ? { name: before.name } : null, new_value: { name: data.name }, performed_by: userId,
+    });
+    return { ok: true };
+  });
+
+export const deleteTeam = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { data: before } = await supabase.from("teams").select("*").eq("id", data.id).single();
+    const { count } = await supabase.from("scores").select("id", { count: "exact", head: true }).eq("team_id", data.id);
+    const { error: sErr } = await supabase.from("scores").delete().eq("team_id", data.id);
+    if (sErr) throw new Error(sErr.message);
+    const { error } = await supabase.from("teams").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await supabase.from("audit_logs").insert({
+      action: "team_delete", entity_type: "team", entity_id: data.id,
+      old_value: before ? { name: before.name, team_code: before.team_code, scores_removed: count ?? 0 } : null,
+      new_value: null, performed_by: userId,
+    });
+    return { ok: true };
+  });

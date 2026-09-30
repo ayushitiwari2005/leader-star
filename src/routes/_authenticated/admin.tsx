@@ -16,7 +16,9 @@ import {
   getAuditLogs,
   getMyRole,
   updateActivity,
-  updateTeam,
+  createTeam,
+  renameTeam,
+  deleteTeam,
   upsertScore,
 } from "@/lib/admin.functions";
 import { formatCapital, formatScore, formatTime } from "@/lib/leaderboard";
