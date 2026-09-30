@@ -16,10 +16,12 @@ import {
   getAuditLogs,
   getMyRole,
   updateActivity,
-  updateTeam,
+  createTeam,
+  renameTeam,
+  deleteTeam,
   upsertScore,
 } from "@/lib/admin.functions";
-import { formatCapital, formatScore, formatTime } from "@/lib/leaderboard";
+import { formatScore, formatTime } from "@/lib/leaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -480,92 +482,166 @@ function ScoreEntry({
 
 function TeamsSection({ teams }: { teams: import("@/lib/leaderboard").Team[] }) {
   const queryClient = useQueryClient();
+  const [newName, setNewName] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
-  const [capital, setCapital] = useState("");
-  const [business, setBusiness] = useState("");
+  const [editName, setEditName] = useState("");
+  const [toDelete, setToDelete] = useState<import("@/lib/leaderboard").Team | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const save = async (id: string) => {
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+  const isDup = (name: string, exceptId?: string) =>
+    teams.some((t) => t.id !== exceptId && t.name.trim().toLowerCase() === name.trim().toLowerCase());
+
+  const add = async (e: { preventDefault(): void }) => {
+    e.preventDefault();
+    const name = newName.trim();
+    if (!name) { toast.error("Team name is required."); return; }
+    if (isDup(name)) { toast.error(`A team named "${name}" already exists.`); return; }
+    setAdding(true);
     try {
-      await updateTeam({
-        data: {
-          id,
-          currentCapital: capital !== "" ? Number(capital) : undefined,
-          acquiredBusiness: business || null,
-        },
-      });
-      toast.success("Team updated");
-      setEditing(null);
-      void queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      await createTeam({ data: { name } });
+      toast.success(`Team "${name}" added`);
+      setNewName("");
+      await refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
+      toast.error(err instanceof Error ? err.message : "Could not add team");
+    } finally {
+      setAdding(false);
     }
   };
 
+  const saveName = async (id: string) => {
+    const name = editName.trim();
+    if (!name) { toast.error("Team name is required."); return; }
+    if (isDup(name, id)) { toast.error(`A team named "${name}" already exists.`); return; }
+    try {
+      await renameTeam({ data: { id, name } });
+      toast.success("Team renamed");
+      setEditing(null);
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Rename failed");
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete) return;
+    setBusy(true);
+    try {
+      await deleteTeam({ data: { id: toDelete.id } });
+      toast.success(`Team "${toDelete.name}" deleted`);
+      setToDelete(null);
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const q = search.trim().toLowerCase();
+  const filtered = q
+    ? teams.filter((t) => t.name.toLowerCase().includes(q) || t.team_code.toLowerCase().includes(q))
+    : teams;
+
   return (
-    <div className="overflow-x-auto border border-line/40 bg-ink-2/80">
-      <div className="min-w-[650px]">
-      <div className="grid grid-cols-[4rem_1fr_7rem_1fr_5rem] gap-3 border-b border-line px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-        <span>Code</span>
-        <span>Team</span>
-        <span className="text-right">Capital</span>
-        <span>Acquired Business</span>
-        <span />
-      </div>
-      <div className="divide-y divide-line/60">
-        {teams.map((t) => (
-          <div
-            key={t.id}
-            className="grid grid-cols-[4rem_1fr_7rem_1fr_5rem] items-center gap-3 px-4 py-2.5"
-          >
-            <span className="font-mono text-sm text-muted-foreground">{t.team_code}</span>
-            <span className="truncate font-medium text-foreground">{t.name}</span>
+    <div className="space-y-4">
+      <form onSubmit={add} className="flex flex-col gap-2 border border-line/40 bg-ink-2/80 p-4 sm:flex-row sm:items-end">
+        <div className="flex-1 space-y-1.5">
+          <Label htmlFor="new-team" className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Team Name
+          </Label>
+          <Input
+            id="new-team"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Enter team name"
+            maxLength={100}
+            className="border-line bg-ink-3/60"
+          />
+        </div>
+        <Button type="submit" disabled={adding} className="bg-primary font-mono text-xs uppercase tracking-[0.15em] text-primary-foreground hover:bg-primary/90">
+          {adding ? "Adding…" : "Add Team"}
+        </Button>
+      </form>
+
+      <Input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={`Search ${teams.length} teams…`}
+        className="border-line bg-ink-2/80"
+      />
+
+      <div className="divide-y divide-line/60 border border-line/40 bg-ink-2/80">
+        {filtered.length === 0 && (
+          <p className="px-4 py-6 text-center text-sm text-muted-foreground">No teams found.</p>
+        )}
+        {filtered.map((t) => (
+          <div key={t.id} className="flex items-center gap-3 px-4 py-2.5">
+            <span className="w-12 shrink-0 font-mono text-sm text-muted-foreground">{t.team_code}</span>
             {editing === t.id ? (
               <>
                 <Input
-                  type="number"
-                  value={capital}
-                  onChange={(e) => setCapital(e.target.value)}
-                  className="h-8 border-line bg-ink-3/60 text-right font-mono text-sm"
+                  autoFocus
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void saveName(t.id);
+                    if (e.key === "Escape") setEditing(null);
+                  }}
+                  maxLength={100}
+                  className="h-8 flex-1 border-line bg-ink-3/60 text-sm"
                 />
-                <Input
-                  value={business}
-                  onChange={(e) => setBusiness(e.target.value)}
-                  placeholder="Business name…"
-                  className="h-8 border-line bg-ink-3/60 font-mono text-sm"
-                />
-                <div className="flex justify-end gap-1">
-                  <Button size="sm" onClick={() => void save(t.id)} className="h-8 bg-primary font-mono text-[10px] uppercase text-primary-foreground">
-                    Save
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditing(null)} className="h-8 font-mono text-[10px] uppercase">
-                    ✕
-                  </Button>
-                </div>
+                <Button size="sm" onClick={() => void saveName(t.id)} className="h-8 bg-primary font-mono text-[10px] uppercase text-primary-foreground">
+                  Save
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditing(null)} className="h-8 font-mono text-[10px] uppercase">
+                  Cancel
+                </Button>
               </>
             ) : (
               <>
-                <span className="text-right font-mono text-sm text-foreground">
-                  {formatCapital(t.current_capital)}
-                </span>
-                <span className="truncate font-mono text-sm text-muted-foreground">
-                  {t.acquired_business ?? "—"}
-                </span>
+                <span className="min-w-0 flex-1 truncate font-medium text-foreground">{t.name}</span>
                 <button
-                  onClick={() => {
-                    setEditing(t.id);
-                    setCapital(String(t.current_capital));
-                    setBusiness(t.acquired_business ?? "");
-                  }}
-                  className="justify-self-end rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-primary ring-1 ring-primary/30 transition-colors hover:bg-primary/10"
+                  onClick={() => { setEditing(t.id); setEditName(t.name); }}
+                  className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-primary ring-1 ring-primary/30 hover:bg-primary/10"
                 >
                   Edit
+                </button>
+                <button
+                  onClick={() => setToDelete(t)}
+                  className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-down ring-1 ring-down/30 hover:bg-down/10"
+                >
+                  Delete
                 </button>
               </>
             )}
           </div>
         ))}
       </div>
-      </div>
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && !busy && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{toDelete?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the team and <strong>all of its scores</strong> across every activity. The leaderboard will be re-ranked. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={busy}
+              onClick={(e) => { e.preventDefault(); void confirmDelete(); }}
+              className="bg-down text-primary-foreground hover:bg-down/90"
+            >
+              {busy ? "Deleting…" : "Delete Team"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
