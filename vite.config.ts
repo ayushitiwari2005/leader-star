@@ -9,11 +9,11 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // Public (publishable) backend config baked in as a fallback so a build that
 // runs without VITE_* env vars never ships a blank screen. Safe to expose.
 const SUPABASE_URL =
-  process.env.VITE_SUPABASE_URL ||
+  process.env['VITE_SUPABASE_URL'] ||
   "https://c--5f494f38-c189-41e2-bbac-f24fd0fff458-prod.lovable.cloud";
 const SUPABASE_PUBLISHABLE_KEY =
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_9PGQdJF0YM7AjE4vs6m5Fg_PQUCLNbx";
-const SUPABASE_PROJECT_ID = process.env.VITE_SUPABASE_PROJECT_ID || "imwmykjyeuwtzpnfljyy";
+  process.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || "sb_publishable_9PGQdJF0YM7AjE4vs6m5Fg_PQUCLNbx";
+const SUPABASE_PROJECT_ID = process.env['VITE_SUPABASE_PROJECT_ID'] || "imwmykjyeuwtzpnfljyy";
 
 export default defineConfig({
   tanstackStart: {
