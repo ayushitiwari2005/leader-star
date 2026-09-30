@@ -17,7 +17,7 @@ export interface Activity {
   day: number;
   max_score: number;
   weight: number;
-  status: "upcoming" | "live" | "completed";
+  status: "upcoming" | "live" | "completed" | "disabled";
   sort_order: number;
 }
 
@@ -53,7 +53,7 @@ export function computeStandings(
   scores: Score[],
 ): Standing[] {
   const counted = new Set(
-    activities.filter((a) => a.status !== "upcoming").map((a) => a.id),
+    activities.filter((a) => a.status === "live" || a.status === "completed").map((a) => a.id),
   );
   const boardroom = activities.find((a) => a.name === "The Boardroom");
   const weightOf = new Map(activities.map((a) => [a.id, a.weight]));
