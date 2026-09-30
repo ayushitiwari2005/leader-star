@@ -21,7 +21,7 @@ import {
   deleteTeam,
   upsertScore,
 } from "@/lib/admin.functions";
-import { formatCapital, formatScore, formatTime } from "@/lib/leaderboard";
+import { formatScore, formatTime } from "@/lib/leaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -494,7 +494,7 @@ function TeamsSection({ teams }: { teams: import("@/lib/leaderboard").Team[] }) 
   const isDup = (name: string, exceptId?: string) =>
     teams.some((t) => t.id !== exceptId && t.name.trim().toLowerCase() === name.trim().toLowerCase());
 
-  const add = async (e: React.FormEvent) => {
+  const add = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     const name = newName.trim();
     if (!name) return toast.error("Team name is required.");
