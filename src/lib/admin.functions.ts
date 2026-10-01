@@ -8,23 +8,16 @@ type Sb = SupabaseClient<Database>;
 const CONFLICT =
   "CONFLICT: This score was changed by another admin. Please review the latest value and try again.";
 
-async function getRole(supabase: Sb, userId: string) {
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = (data ?? []).map((r) => r.role as string);
-  if (roles.includes("super_admin")) return "super_admin";
-  if (roles.includes("admin")) return "admin";
-  return roles[0] ?? null;
+/** Admin = signed-in account with a verified email (checked in the database). */
+async function getRole(supabase: Sb, userId: string): Promise<string | null> {
+  const { data } = await supabase.rpc("is_admin", { _user_id: userId });
+  return data ? "admin" : null;
 }
 
 async function assertAdmin(supabase: Sb, userId: string) {
   const role = await getRole(supabase, userId);
-  if (role !== "admin" && role !== "super_admin") throw new Error("You do not have admin permission.");
-  return role;
-}
-
-async function assertSuper(supabase: Sb, userId: string) {
-  const role = await getRole(supabase, userId);
-  if (role !== "super_admin") throw new Error("Only a super admin can do this.");
+  if (role !== "admin") throw new Error("Please verify your email before using the Admin Panel.");
+  return "admin";
 }
 
 async function names(supabase: Sb, teamId: string, activityId: string) {
@@ -72,8 +65,6 @@ async function writeScore(
   const { data: activity } = await supabase.from("activities").select("*").eq("id", activityId).maybeSingle();
   if (!activity) throw new Error("This activity no longer exists.");
   if (activity.status === "disabled") throw new Error("This activity is disabled. Enable it before scoring.");
-  if (activity.status === "completed" && role !== "super_admin")
-    throw new Error("This activity is completed. Only a super admin can change its scores.");
   if (points !== null) {
     if (points < 0) throw new Error("Score cannot be negative.");
     if (points > activity.max_score) throw new Error(`Score cannot exceed the maximum of ${activity.max_score}.`);
@@ -137,19 +128,12 @@ async function writeScore(
 
 /* ---------------- Roles ---------------- */
 
-/** Returns the current user's role, bootstrapping the very first user as super_admin. */
+/** Returns "admin" when the signed-in account's email is verified, otherwise null. */
 export const getMyRole = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const role = await getRole(supabase, userId);
-    if (role) return { role: role as string | null };
-    const { count } = await supabase.from("user_roles").select("id", { count: "exact", head: true });
-    if ((count ?? 0) === 0) {
-      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "super_admin" });
-      if (!error) return { role: "super_admin" as string | null };
-    }
-    return { role: null as string | null };
+    return { role: await getRole(supabase, userId) };
   });
 
 /* ---------------- Scores ---------------- */
@@ -380,8 +364,6 @@ export const updateActivity = createServerFn({ method: "POST" })
     const role = await assertAdmin(supabase, userId);
     const { data: before } = await supabase.from("activities").select("*").eq("id", data.id).single();
     if (!before) throw new Error("Activity not found.");
-    if (before.status === "completed" && role !== "super_admin" && (data.maxScore !== undefined || data.status))
-      throw new Error("Only a super admin can change a completed activity.");
     if (data.maxScore !== undefined) {
       const { data: over } = await supabase.from("scores").select("id").eq("activity_id", data.id).gt("points", data.maxScore).limit(1);
       if (over?.length) throw new Error("Some teams already scored above that maximum. Lower their scores first.");
@@ -414,8 +396,6 @@ export const deleteActivity = createServerFn({ method: "POST" })
     const role = await assertAdmin(supabase, userId);
     const { data: before } = await supabase.from("activities").select("*").eq("id", data.id).single();
     if (!before) throw new Error("Activity not found.");
-    if (before.status === "completed" && role !== "super_admin")
-      throw new Error("Only a super admin can delete a completed activity.");
     const { count } = await supabase.from("scores").select("id", { count: "exact", head: true }).eq("activity_id", data.id);
     const { error } = await supabase.from("activities").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -427,60 +407,3 @@ export const deleteActivity = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/* ---------------- Admin users ---------------- */
-
-export const listAdmins = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    await assertAdmin(supabase, userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: roles }, { data: users }] = await Promise.all([
-      supabaseAdmin.from("user_roles").select("user_id, role"),
-      supabaseAdmin.auth.admin.listUsers({ perPage: 200 }),
-    ]);
-    const byId = new Map((users?.users ?? []).map((u) => [u.id, u.email ?? u.id]));
-    return {
-      admins: (roles ?? []).map((r) => ({ userId: r.user_id, role: r.role as string, email: byId.get(r.user_id) ?? "Unknown", isMe: r.user_id === userId })),
-    };
-  });
-
-export const setAdminRole = createServerFn({ method: "POST" })
-  .inputValidator((data) =>
-    z.object({ email: z.string().trim().email("Enter a valid email."), role: z.enum(["admin", "super_admin", "viewer"]) }).parse(data),
-  )
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    await assertSuper(supabase, userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
-    const user = (users?.users ?? []).find((u) => u.email?.toLowerCase() === data.email.toLowerCase());
-    if (!user) throw new Error("No account with that email. Ask them to sign up on the admin login page first.");
-    if (user.id === userId) throw new Error("You cannot change your own role.");
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", user.id);
-    const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: user.id, role: data.role });
-    if (error) throw new Error(error.message);
-    await supabase.from("audit_logs").insert({
-      action: "role_set", entity_type: "user", entity_id: user.id,
-      old_value: null, new_value: { email: user.email, role: data.role }, performed_by: userId,
-    });
-    return { ok: true };
-  });
-
-export const removeAdmin = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({ userId: z.string().uuid() }).parse(data))
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    await assertSuper(supabase, userId);
-    if (data.userId === userId) throw new Error("You cannot remove your own access.");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
-    if (error) throw new Error(error.message);
-    await supabase.from("audit_logs").insert({
-      action: "role_remove", entity_type: "user", entity_id: data.userId,
-      old_value: null, new_value: null, performed_by: userId,
-    });
-    return { ok: true };
-  });

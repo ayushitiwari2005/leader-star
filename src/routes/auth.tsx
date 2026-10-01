@@ -49,7 +49,7 @@ function AuthPage() {
       if (error) throw error;
       const { role } = await getMyRole();
       if (!role) {
-        toast.error("Your account has no admin role yet. Ask the super admin to grant access.");
+        toast.error("Please verify your email before using the Admin Panel.");
       }
       void navigate({ to: "/admin" });
     } catch (err) {
@@ -116,7 +116,7 @@ function AuthPage() {
           {mode === "signin" ? "Need an account? Sign up" : "Have an account? Sign in"}
         </button>
         <p className="mt-4 text-center font-mono text-[10px] text-muted-foreground/70">
-          The first account to sign in becomes the super admin.
+          Verify your email after signing up to unlock the Admin Panel.
         </p>
       </div>
     </div>

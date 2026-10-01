@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   ListChecks,
   LogOut,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,11 +20,8 @@ import {
   deleteTeam,
   getMyRole,
   getScoreHistory,
-  listAdmins,
-  removeAdmin,
   renameTeam,
   rollbackScore,
-  setAdminRole,
   updateActivity,
   upsertScore,
 } from "@/lib/admin.functions";
@@ -59,7 +55,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Section = "dashboard" | "teams" | "activities" | "scores" | "history" | "admins";
+type Section = "dashboard" | "teams" | "activities" | "scores" | "history";
 
 const NAV: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -67,7 +63,6 @@ const NAV: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "activities", label: "Activities", icon: ActivityIcon },
   { id: "scores", label: "Score Management", icon: ClipboardList },
   { id: "history", label: "Score History", icon: History },
-  { id: "admins", label: "Admin Users", icon: ShieldCheck },
 ];
 
 type HistoryLog = Awaited<ReturnType<typeof getScoreHistory>>["logs"][number];
@@ -140,8 +135,8 @@ function AdminPage() {
 
   const roleQuery = useQuery({ queryKey: ["my-role"], queryFn: () => getMyRole() });
   const role = roleQuery.data?.role ?? null;
-  const canEdit = role === "admin" || role === "super_admin";
-  const isSuper = role === "super_admin";
+  const canEdit = role === "admin";
+  const isSuper = canEdit;
 
   const historyQuery = useQuery({
     queryKey: ["score-history"],
@@ -166,9 +161,9 @@ function AdminPage() {
       <div className="grid min-h-screen place-items-center p-6">
         <div className={cn(panel, "max-w-md p-8 text-center")}>
           <img src={emblem.url} alt="BIZZNNOVATE emblem" className="mx-auto size-14 object-contain" />
-          <h1 className="mt-4 font-heading text-2xl">No admin access</h1>
+          <h1 className="mt-4 font-heading text-2xl">Email not verified</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            This account can’t edit the leaderboard. Ask a super admin to add you under Admin Users.
+            Please verify your email address using the link we sent you, then sign in again.
           </p>
           <div className="mt-6 flex justify-center gap-2">
             <Button asChild variant="outline"><Link to="/">View leaderboard</Link></Button>
@@ -218,7 +213,7 @@ function AdminPage() {
         <div className="mb-6">
           <h1 className="font-heading text-3xl font-semibold tracking-wide">{NAV.find((n) => n.id === section)?.label}</h1>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-            Role: {role?.replace("_", " ")} · Updated {lastUpdated ? formatTime(lastUpdated) : "—"}
+            Verified admin · Updated {lastUpdated ? formatTime(lastUpdated) : "—"}
           </p>
         </div>
 
@@ -233,7 +228,6 @@ function AdminPage() {
             {section === "activities" && <ActivitiesSection activities={activities} scores={scores} isSuper={isSuper} />}
             {section === "scores" && <ScoresSection teams={teams} activities={activities} scores={scores} isSuper={isSuper} />}
             {section === "history" && <HistorySection logs={logs} loading={historyQuery.isLoading} />}
-            {section === "admins" && <AdminsSection isSuper={isSuper} />}
           </>
         )}
       </main>
@@ -780,7 +774,7 @@ function ScoresSection({ teams, activities, scores, isSuper }: { teams: Team[]; 
             {bulkBusy ? "Saving…" : `Save all (${dirty.length})`}
           </Button>
         </div>
-        {locked && <p className="text-sm text-down">This activity is completed. Only a super admin can change its scores.</p>}
+        {locked && <p className="text-sm text-down">This activity is completed. Switch it back to live to change its scores.</p>}
 
         {activity && (
           <div className={cn(panel, "overflow-x-auto")}>
@@ -935,97 +929,3 @@ function HistorySection({ logs, loading }: { logs: HistoryLog[]; loading: boolea
 
 /* ---------- admin users ---------- */
 
-function AdminsSection({ isSuper }: { isSuper: boolean }) {
-  const qc = useQueryClient();
-  const admins = useQuery({ queryKey: ["admins"], queryFn: () => listAdmins() });
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "super_admin" | "viewer">("admin");
-  const [busy, setBusy] = useState(false);
-  const [toRemove, setToRemove] = useState<{ userId: string; email: string } | null>(null);
-  const [removing, setRemoving] = useState(false);
-
-  const add = async (e: { preventDefault(): void }) => {
-    e.preventDefault();
-    if (busy) return;
-    if (!email.trim()) { toast.error("Enter an email."); return; }
-    setBusy(true);
-    try {
-      await setAdminRole({ data: { email: email.trim(), role } });
-      toast.success("Access updated successfully.");
-      setEmail("");
-      await qc.invalidateQueries({ queryKey: ["admins"] });
-    } catch (err) {
-      toast.error(errMsg(err, "Failed to update access. Please try again."));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const remove = async () => {
-    if (!toRemove) return;
-    setRemoving(true);
-    try {
-      await removeAdmin({ data: { userId: toRemove.userId } });
-      toast.success("Access removed.");
-      setToRemove(null);
-      await qc.invalidateQueries({ queryKey: ["admins"] });
-    } catch (err) {
-      toast.error(errMsg(err, "Failed to remove access. Please try again."));
-    } finally {
-      setRemoving(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      {isSuper ? (
-        <form onSubmit={add} className={cn(panel, "grid gap-3 p-4 sm:grid-cols-[1fr_10rem_auto] sm:items-end")}>
-          <div className="space-y-1.5">
-            <Label htmlFor="adm-email">Email of an existing account</Label>
-            <Input id="adm-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="volunteer@example.com" className="h-11 border-line bg-ink-3/60" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="adm-role">Role</Label>
-            <select id="adm-role" value={role} onChange={(e) => setRole(e.target.value as typeof role)} className="h-11 w-full border border-line bg-ink-3/60 px-2 text-sm">
-              <option value="admin">Admin</option>
-              <option value="super_admin">Super admin</option>
-              <option value="viewer">Viewer (no editing)</option>
-            </select>
-          </div>
-          <Button type="submit" disabled={busy} className={cn(btnSave, "h-11 px-6")}>{busy ? "Saving…" : "Grant Access"}</Button>
-          <p className="text-xs text-muted-foreground sm:col-span-3">The person must first create an account on the admin sign-in page.</p>
-        </form>
-      ) : (
-        <p className="text-sm text-muted-foreground">Only a super admin can add or remove admins.</p>
-      )}
-
-      <div className={cn(panel, "overflow-x-auto")}>
-        <table className="w-full min-w-[480px]">
-          <thead className="border-b border-line">
-            <tr><th className={th}>Email</th><th className={th}>Role</th><th className={cn(th, "text-right")}>Actions</th></tr>
-          </thead>
-          <tbody className="divide-y divide-line/50">
-            {admins.isLoading && <tr><td colSpan={3} className="px-3 py-6 text-center text-sm text-muted-foreground">Loading…</td></tr>}
-            {admins.error && <tr><td colSpan={3} className="px-3 py-6 text-center text-sm text-down">{errMsg(admins.error, "Could not load admins.")}</td></tr>}
-            {admins.data?.admins.map((a) => (
-              <tr key={a.userId}>
-                <td className={td}>{a.email}{a.isMe && <span className="ml-2 text-xs text-muted-foreground">(you)</span>}</td>
-                <td className={cn(td, "capitalize")}>{a.role.replace("_", " ")}</td>
-                <td className={cn(td, "text-right")}>
-                  {isSuper && !a.isMe && <Button onClick={() => setToRemove({ userId: a.userId, email: a.email })} className={btnDelete}>Remove</Button>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <Confirm
-        open={!!toRemove} busy={removing} confirmLabel="Remove Access"
-        title={`Remove access for ${toRemove?.email}?`}
-        description="They will no longer be able to change teams, activities or scores."
-        onCancel={() => setToRemove(null)} onConfirm={() => void remove()}
-      />
-    </div>
-  );
-}
