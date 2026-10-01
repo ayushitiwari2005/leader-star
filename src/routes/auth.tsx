@@ -49,7 +49,7 @@ function AuthPage() {
       if (error) throw error;
       const { role } = await getMyRole();
       if (!role) {
-        toast.error("Your account has no admin role yet. Ask the super admin to grant access.");
+        toast.error("Please verify your email before using the Admin Panel.");
       }
       void navigate({ to: "/admin" });
     } catch (err) {
