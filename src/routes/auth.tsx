@@ -116,7 +116,7 @@ function AuthPage() {
           {mode === "signin" ? "Need an account? Sign up" : "Have an account? Sign in"}
         </button>
         <p className="mt-4 text-center font-mono text-[10px] text-muted-foreground/70">
-          The first account to sign in becomes the super admin.
+          Verify your email after signing up to unlock the Admin Panel.
         </p>
       </div>
     </div>

@@ -17,8 +17,7 @@ async function getRole(supabase: Sb, userId: string): Promise<string | null> {
 async function assertAdmin(supabase: Sb, userId: string) {
   const role = await getRole(supabase, userId);
   if (role !== "admin") throw new Error("Please verify your email before using the Admin Panel.");
-  // All verified admins have equal permissions.
-  return "super_admin";
+  return "admin";
 }
 
 async function names(supabase: Sb, teamId: string, activityId: string) {
@@ -66,8 +65,6 @@ async function writeScore(
   const { data: activity } = await supabase.from("activities").select("*").eq("id", activityId).maybeSingle();
   if (!activity) throw new Error("This activity no longer exists.");
   if (activity.status === "disabled") throw new Error("This activity is disabled. Enable it before scoring.");
-  if (activity.status === "completed" && role !== "super_admin")
-    throw new Error("This activity is completed. Only a super admin can change its scores.");
   if (points !== null) {
     if (points < 0) throw new Error("Score cannot be negative.");
     if (points > activity.max_score) throw new Error(`Score cannot exceed the maximum of ${activity.max_score}.`);
@@ -367,8 +364,6 @@ export const updateActivity = createServerFn({ method: "POST" })
     const role = await assertAdmin(supabase, userId);
     const { data: before } = await supabase.from("activities").select("*").eq("id", data.id).single();
     if (!before) throw new Error("Activity not found.");
-    if (before.status === "completed" && role !== "super_admin" && (data.maxScore !== undefined || data.status))
-      throw new Error("Only a super admin can change a completed activity.");
     if (data.maxScore !== undefined) {
       const { data: over } = await supabase.from("scores").select("id").eq("activity_id", data.id).gt("points", data.maxScore).limit(1);
       if (over?.length) throw new Error("Some teams already scored above that maximum. Lower their scores first.");
@@ -401,8 +396,6 @@ export const deleteActivity = createServerFn({ method: "POST" })
     const role = await assertAdmin(supabase, userId);
     const { data: before } = await supabase.from("activities").select("*").eq("id", data.id).single();
     if (!before) throw new Error("Activity not found.");
-    if (before.status === "completed" && role !== "super_admin")
-      throw new Error("Only a super admin can delete a completed activity.");
     const { count } = await supabase.from("scores").select("id", { count: "exact", head: true }).eq("activity_id", data.id);
     const { error } = await supabase.from("activities").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
