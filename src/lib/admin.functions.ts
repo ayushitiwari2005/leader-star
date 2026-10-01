@@ -8,23 +8,17 @@ type Sb = SupabaseClient<Database>;
 const CONFLICT =
   "CONFLICT: This score was changed by another admin. Please review the latest value and try again.";
 
-async function getRole(supabase: Sb, userId: string) {
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = (data ?? []).map((r) => r.role as string);
-  if (roles.includes("super_admin")) return "super_admin";
-  if (roles.includes("admin")) return "admin";
-  return roles[0] ?? null;
+/** Admin = signed-in account with a verified email (checked in the database). */
+async function getRole(supabase: Sb, userId: string): Promise<string | null> {
+  const { data } = await supabase.rpc("is_admin", { _user_id: userId });
+  return data ? "admin" : null;
 }
 
 async function assertAdmin(supabase: Sb, userId: string) {
   const role = await getRole(supabase, userId);
-  if (role !== "admin" && role !== "super_admin") throw new Error("You do not have admin permission.");
-  return role;
-}
-
-async function assertSuper(supabase: Sb, userId: string) {
-  const role = await getRole(supabase, userId);
-  if (role !== "super_admin") throw new Error("Only a super admin can do this.");
+  if (role !== "admin") throw new Error("Please verify your email before using the Admin Panel.");
+  // All verified admins have equal permissions.
+  return "super_admin";
 }
 
 async function names(supabase: Sb, teamId: string, activityId: string) {
@@ -137,19 +131,12 @@ async function writeScore(
 
 /* ---------------- Roles ---------------- */
 
-/** Returns the current user's role, bootstrapping the very first user as super_admin. */
+/** Returns "admin" when the signed-in account's email is verified, otherwise null. */
 export const getMyRole = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const role = await getRole(supabase, userId);
-    if (role) return { role: role as string | null };
-    const { count } = await supabase.from("user_roles").select("id", { count: "exact", head: true });
-    if ((count ?? 0) === 0) {
-      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "super_admin" });
-      if (!error) return { role: "super_admin" as string | null };
-    }
-    return { role: null as string | null };
+    return { role: await getRole(supabase, userId) };
   });
 
 /* ---------------- Scores ---------------- */
